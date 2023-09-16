@@ -33,6 +33,15 @@ st.title(':red[Youtube Data Harvesting]')
 
 # ========================================   /     Data collection zone and Stored data to MongoDB    /   =================================== #
 
+# Access youtube API
+def API_connect():
+    API_Key = 'AIzaSyCBHiGRtPfNrc6B341gpI-hOqLGWUU_8jI'
+    serive_name = 'youtube'
+    Version = 'v3'
+    Youtube = build(serive_name,Version,developerKey=API_Key)
+    return Youtube
+youtube = API_connect()
+
 # Data collection zone
 col1, col2 = st.columns(2)
 with col1:
@@ -45,17 +54,8 @@ with col1:
     # Define Session state to Get data button
     if "Get_state" not in st.session_state:
         st.session_state.Get_state = False
-    if Get_data or st.session_state.Get_state:
+    if Get_data:
         st.session_state.Get_state = True
-    
-        # Access youtube API
-        def API_connect():
-            API_Key = 'AIzaSyCBHiGRtPfNrc6B341gpI-hOqLGWUU_8jI'
-            serive_name = 'youtube'
-            Version = 'v3'
-            Youtube = build(serive_name,Version,developerKey=API_Key)
-            return Youtube
-        youtube = API_connect()
     
         # Define a function to retrieve channel data
                
@@ -482,7 +482,12 @@ cursor=connect_for_questions.cursor()
 
 # Q1
 if question_tosql == '1. What are the names of all the videos and their corresponding channels?':
-    cursor.execute("SELECT channel.Channel_Name, video.Video_Name FROM channel JOIN playlist JOIN video ON channel.Channel_Id = playlist.Channel_Id AND playlist.Playlist_Id = video.Playlist_Id;")
+    cursor.execute("""
+    SELECT channel.Channel_Name, video.Video_Name
+    FROM channel
+    JOIN playlist ON channel.Channel_Id = playlist.Channel_Id
+    JOIN video ON playlist.Playlist_Id = video.Playlist_Id
+    ORDER BY channel.Channel_Name, video.Video_Name""")
     result_1 = cursor.fetchall()
     df1 = pd.DataFrame(result_1, columns=['Channel Name', 'Video Name']).reset_index(drop=True)
     df1.index += 1

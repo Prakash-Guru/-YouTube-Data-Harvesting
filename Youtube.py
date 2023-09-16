@@ -50,7 +50,7 @@ with col1:
     
         # Access youtube API
         def API_connect():
-            API_Key = 'AIzaSyAZdOEs7ufE4UCLdDNrblFCMVXPCqyBs7k'
+            API_Key = 'AIzaSyCBHiGRtPfNrc6B341gpI-hOqLGWUU_8jI'
             serive_name = 'youtube'
             Version = 'v3'
             Youtube = build(serive_name,Version,developerKey=API_Key)

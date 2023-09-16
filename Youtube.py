@@ -35,7 +35,7 @@ st.title(':red[Youtube Data Harvesting]')
 
 # Access youtube API
 def API_connect():
-    API_Key = 'AIzaSyCBHiGRtPfNrc6B341gpI-hOqLGWUU_8jI'
+    API_Key = 'AIzaSyDOR_x5DiumGn3_xu_NVP3Tra4-yKhAugM'
     serive_name = 'youtube'
     Version = 'v3'
     Youtube = build(serive_name,Version,developerKey=API_Key)

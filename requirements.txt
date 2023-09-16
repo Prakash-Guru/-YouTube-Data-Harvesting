@@ -1,7 +1,7 @@
 streamlit
 pandas
-postgre
-googleapiclient.discovery
-json
+postgres
+google-api-python-client
+jsonlib
 sqlalchemy
 Mongodb

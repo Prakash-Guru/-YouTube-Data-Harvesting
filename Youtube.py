@@ -87,7 +87,6 @@ with col1:
         
         # Process channel data
         # Extract required information from the channel_data
-        channel_name = channel_data['items'][0]['snippet']['title']
         channel_video_count = channel_data['items'][0]['statistics']['videoCount']
         channel_subscriber_count = channel_data['items'][0]['statistics']['subscriberCount']
         channel_view_count = channel_data['items'][0]['statistics']['viewCount']

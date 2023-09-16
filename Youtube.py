@@ -58,24 +58,19 @@ with col1:
         st.session_state.Get_state = True
     
         # Define a function to retrieve channel data
-               
-        def get_channel_details(youtube,channel_id):
-            try:
-                channel_request = youtube.search().list(
+        channel_request = youtube.search().list(
                 part = "id,snippet",
                 channelType='any',
                 q = channel_name)
-                request=channel_request.execute()
-                channel_id=request['items'][0]['snippet']['channelId']
+        request=channel_request.execute()
+        channel_id=request['items'][0]['snippets']['channelId']       
+        def get_channel_details(youtube,channel_id):
+            try:
                 request = youtube.channels().list(
                 part = 'snippet,statistics,contentDetails',
                 id = channel_id)
                 channel_response = request.execute()
-                request = youtube.channels().list(
-                    part = 'snippet,statistics,contentDetails',
-                    id = channel_id)
-                channel_response = request.execute()
-                                
+                                 
                 if 'items' not in channel_response:
                         st.write(f"Invalid Channel name: {channel_name}")
                         st.error("Enter the valid channel name **channel name**")
@@ -304,7 +299,7 @@ with col2:
     # Define Session state to Migrate to MySQL button
     if 'migrate_sql' not in st.session_state:
         st.session_state_migrate_sql = False
-    if Migrate or st.session_state_migrate_sql:
+    if Migrate:
         st.session_state_migrate_sql = True
 
         # Retrieve the document with the specified name
@@ -388,18 +383,18 @@ with col2:
         database='youtube')
         # Create a new database and use
         my_cursor=my_db.cursor()
-        DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
+        DATABASE_URL = "postgresql://postgres:12345678@localhost/youtube"
         engine = create_engine(DATABASE_URL)
         
         # Channel data to SQL
         channel_df.to_sql('channel', engine, if_exists='append', index=False,
-                        dtype = {"Channel_Name": sqlalchemy.types.VARCHAR(length=225),
-                                "Channel_Id": sqlalchemy.types.VARCHAR(length=225),
-                                "Video_Count": sqlalchemy.types.INT,
-                                "Subscriber_Count": sqlalchemy.types.BigInteger,
-                                "Channel_Views": sqlalchemy.types.BigInteger,
-                                "Channel_Description": sqlalchemy.types.TEXT,
-                                "Playlist_Id": sqlalchemy.types.VARCHAR(length=225),})
+                          dtype = {"Channel_Name": sqlalchemy.types.VARCHAR(length=225),
+                          "Channel_Id": sqlalchemy.types.VARCHAR(length=225),
+                          "Video_Count": sqlalchemy.types.INT,
+                          "Subscriber_Count": sqlalchemy.types.BigInteger,
+                          "Channel_Views": sqlalchemy.types.BigInteger,
+                          "Channel_Description": sqlalchemy.types.TEXT,
+                          "Playlist_Id": sqlalchemy.types.VARCHAR(length=225),})
               
 
         # Playlist data to SQL
@@ -442,7 +437,7 @@ Check_channel = st.checkbox('**Check available channel data for analysis**')
 
 if Check_channel:
    # Create database connection
-    DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
+    DATABASE_URL = "postgresql://postgres:12345678@localhost/youtube"
     engine = create_engine(DATABASE_URL)
 
     # Execute SQL query to retrieve channel names

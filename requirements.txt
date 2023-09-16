@@ -1,1 +1,7 @@
-
+streamlit
+pandas
+postgre
+googleapiclient.discovery
+json
+sqlalchemy
+Mongodb

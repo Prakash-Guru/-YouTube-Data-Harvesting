@@ -59,19 +59,23 @@ with col1:
     
         # Define a function to retrieve channel data
                
-        def get_channel_details(youtube,channel_name):
+        def get_channel_details(youtube,channel_id):
             try:
                 channel_request = youtube.search().list(
                 part = "id,snippet",
-                maxResult = 1,
+                channelType='any',
                 q = channel_name)
-                channel_request['items'][0]['snippet']['channelId']
-                channel_response = channel_request.execute()
-                channel_request = youtube.channels().list(
+                request=channel_request.execute()
+                channel_id=request['items'][0]['snippet']['channelId']
+                request = youtube.channels().list(
                 part = 'snippet,statistics,contentDetails',
                 id = channel_id)
-                channel_response = channel_request.execute()
-                
+                channel_response = request.execute()
+                request = youtube.channels().list(
+                    part = 'snippet,statistics,contentDetails',
+                    id = channel_id)
+                channel_response = request.execute()
+                                
                 if 'items' not in channel_response:
                         st.write(f"Invalid Channel name: {channel_name}")
                         st.error("Enter the valid channel name **channel name**")
@@ -82,18 +86,19 @@ with col1:
             except:
                 st.write('You have exceeded your YouTube API quota. Please try again tomorrow.')
         
+
         # Function call to Get Channel data from a single channel name
-        channel_data = get_channel_details(youtube,channel_name)
+        channel_data = get_channel_details(youtube,channel_id)
         
         # Process channel data
         # Extract required information from the channel_data
+        channel_name = channel_data['items'][0]['snippet']['title']
         channel_video_count = channel_data['items'][0]['statistics']['videoCount']
         channel_subscriber_count = channel_data['items'][0]['statistics']['subscriberCount']
         channel_view_count = channel_data['items'][0]['statistics']['viewCount']
         channel_description = channel_data['items'][0]['snippet']['description']
         channel_playlist_id = channel_data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-        channel_id = channel_data["items"][0]['id']['channelId']
-     
+             
      # Format channel_data into dictionary
         channel = {
             "Channel_Details": {
@@ -572,10 +577,3 @@ elif question_tosql == '10. Which videos have the highest number of comments, an
 connect_for_questions.close()
 
 # ===============================================   /   COMPLETED   /   ====================================================================== #            
-    
-
-    
-        
-       
-
-

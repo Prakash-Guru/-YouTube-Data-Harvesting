@@ -388,7 +388,7 @@ with col2:
         database='youtube')
         # Create a new database and use
         my_cursor=my_db.cursor()
-        DATABASE_URL = "postgresql://postgres:12345678@localhost/youtube"
+        DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
         engine = create_engine(DATABASE_URL)
         
         # Channel data to SQL
@@ -442,7 +442,7 @@ Check_channel = st.checkbox('**Check available channel data for analysis**')
 
 if Check_channel:
    # Create database connection
-    DATABASE_URL = "postgresql://postgres:12345678@localhost/youtube"
+    DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
     engine = create_engine(DATABASE_URL)
 
     # Execute SQL query to retrieve channel names

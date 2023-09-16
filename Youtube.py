@@ -61,9 +61,10 @@ with col1:
         channel_request = youtube.search().list(
                 part = "id,snippet",
                 channelType='any',
+                maxResults=1,
                 q = channel_name)
         request=channel_request.execute()
-        channel_id=request['items'][0]['snippets']['channelId']       
+        channel_id=request['items'][0]['snippet']['channelId']       
         def get_channel_details(youtube,channel_id):
             try:
                 request = youtube.channels().list(

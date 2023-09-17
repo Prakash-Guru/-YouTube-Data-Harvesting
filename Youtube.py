@@ -114,25 +114,24 @@ with col1:
             
             video_id = []
             next_page_token = None
-            while True:
-                # Get playlist items
-                request = youtube.playlistItems().list(
-                    part='contentDetails',
-                    playlistId=channel_playlist_id,
-                    maxResults=50,
-                    pageToken=next_page_token)
-                response = request.execute()
+        
+            # Get playlist items
+            request = youtube.playlistItems().list(
+                part='contentDetails',
+                playlistId=channel_playlist_id,
+                maxResults=50,
+                pageToken=next_page_token)
+            response = request.execute()
 
-                # Get video IDs
-                for item in response['items']:
-                    video_id.append(item['contentDetails']['videoId'])
+            # Get video IDs
+            for item in response['items']:
+                video_id.append(item['contentDetails']['videoId'])
 
                 # Check if there are more pages
                 next_page_token = response.get('nextPageToken')
                 if not next_page_token:
                     break
 
-            return video_id
         # Function call to Get  video_ids using channel playlist Id
         video_ids = get_video_ids(youtube, channel_playlist_id)
         
@@ -572,4 +571,4 @@ elif question_tosql == '10. Which videos have the highest number of comments, an
 # SQL DB connection close
 connect_for_questions.close()
 
-# ===============================================   /   COMPLETED   /   ====================================================================== #            
+# ===============================================   /   COMPLETED   /   ====================================================================== #    

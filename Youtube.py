@@ -131,6 +131,7 @@ with col1:
                 next_page_token = response.get('nextPageToken')
                 if not next_page_token:
                     break
+            return video_ids
 
         # Function call to Get  video_ids using channel playlist Id
         video_ids = get_video_ids(youtube, channel_playlist_id)

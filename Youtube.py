@@ -384,7 +384,7 @@ with col2:
                     }
                     comment_details_list.append(comment_details_tosql)
 
-        comments_df = pd.DataFrame(comment_details_list)
+        Comments_df = pd.DataFrame(comment_details_list)
 
         
         # -------------------- Data Migrate to MySQL --------------- #

@@ -112,7 +112,7 @@ with col1:
         # Define a function to retrieve video IDs from channel playlist
         def get_video_ids(youtube, channel_playlist_id):
             
-            video_id = []
+            video_ids = []
             next_page_token = None
         
             # Get playlist items
@@ -125,7 +125,7 @@ with col1:
 
             # Get video IDs
             for item in response['items']:
-                video_id.append(item['contentDetails']['videoId'])
+                video_ids.append(item['contentDetails']['videoId'])
 
                 # Check if there are more pages
                 next_page_token = response.get('nextPageToken')
@@ -383,8 +383,9 @@ with col2:
         database='youtube')
         # Create a new database and use
         my_cursor=my_db.cursor()
-        DATABASE_URL = "postgresql://postgres:12345678@localhost/youtube"
+        DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
         engine = create_engine(DATABASE_URL)
+        
         
         # Channel data to SQL
         channel_df.to_sql('channel', engine, if_exists='append', index=False,
@@ -571,4 +572,4 @@ elif question_tosql == '10. Which videos have the highest number of comments, an
 # SQL DB connection close
 connect_for_questions.close()
 
-# ===============================================   /   COMPLETED   /   ====================================================================== #    
+# ===============================================   /   COMPLETED   /   ====================================================================== #            

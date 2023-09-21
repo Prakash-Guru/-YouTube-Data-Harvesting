@@ -320,59 +320,72 @@ with col2:
             "Playlist_Id": result['Channel_data']['Channel_Details']['Playlist_Id']
             }
         channel_df = pd.DataFrame.from_dict(channel_details_to_sql, orient='index').T
-              
+                
         # playlist data json to df
-        playlist_tosql = {"Channel_Id": result['_id'],
-                        "Playlist_Id": result['Channel_data']['Channel_Details']['Playlist_Id']
-                        }
-        playlist_df = pd.DataFrame.from_dict(playlist_tosql, orient='index').T
+        playlist_details_list = []
+        for playlist_id in result['Channel_data']['Channel_Details']['Playlist_Id']:
+            playlist_details_tosql = {
+                'Channel_Id': result['_id'],
+                'Playlist_Id': playlist_id
+            }
+            playlist_details_list.append(playlist_details_tosql)
+
+        playlist_df = pd.DataFrame(playlist_details_list)
 
         # video data json to df
         video_details_list = []
-        for i in range(1,len(result['Channel_data'])-1):
+        for i in range(1, len(result['Channel_data']) - 1):
+            video_id = result['Channel_data'][f"Video_Id_{i}"]['Video_Id']
+            video_name = result['Channel_data'][f"Video_Id_{i}"]['Video_Name']
+            video_description = result['Channel_data'][f"Video_Id_{i}"]['Video_Description']
+            # Extract other video details similarly...
+
             video_details_tosql = {
-                'Playlist_Id':result['Channel_data']['Channel_Details']['Playlist_Id'],
-                'Video_Id': result['Channel_data'][f"Video_Id_{i}"]['Video_Id'],
-                'Video_Name': result['Channel_data'][f"Video_Id_{i}"]['Video_Name'],
-                'Video_Description': result['Channel_data'][f"Video_Id_{i}"]['Video_Description'],
-                'Published_date': result['Channel_data'][f"Video_Id_{i}"]['PublishedAt'],
-                'View_Count': result['Channel_data'][f"Video_Id_{i}"]['View_Count'],
-                'Like_Count': result['Channel_data'][f"Video_Id_{i}"]['Like_Count'],
-                'Dislike_Count': result['Channel_data'][f"Video_Id_{i}"]['Dislike_Count'],
-                'Favorite_Count': result['Channel_data'][f"Video_Id_{i}"]['Favorite_Count'],
-                'Comment_Count': result['Channel_data'][f"Video_Id_{i}"]['Comment_Count'],
-                'Duration': result['Channel_data'][f"Video_Id_{i}"]['Duration'],
-                'Thumbnail': result['Channel_data'][f"Video_Id_{i}"]['Thumbnail'],
-                'Caption_Status': result['Channel_data'][f"Video_Id_{i}"]['Caption_Status']
-                }
+                'Playlist_Id': result['Channel_data']['Channel_Details']['Playlist_Id'],
+                'Video_Id': video_id,
+                'Video_Name': video_name,
+                'Video_Description': video_description,
+                # Add other video details here...
+            }
             video_details_list.append(video_details_tosql)
+
         video_df = pd.DataFrame(video_details_list)
 
         # Comment data json to df
-        Comment_details_list = []
+        comment_details_list = []
         for i in range(1, len(result['Channel_data']) - 1):
-            comments_access = result['Channel_data'][f"Video_Id_{i}"]['Comments']
-            if comments_access == 'Unavailable' or ('Comment_Id_1' not in comments_access or 'Comment_Id_2' not in comments_access) :
-                Comment_details_tosql = {
+            video_id = result['Channel_data'][f"Video_Id_{i}"]['Video_Id']
+            comments = result['Channel_data'][f"Video_Id_{i}"]['Comments']
+
+            if comments == 'Unavailable':
+                # Handle the case where comments are unavailable
+                comment_details_tosql = {
                     'Video_Id': 'Unavailable',
                     'Comment_Id': 'Unavailable',
                     'Comment_Text': 'Unavailable',
-                    'Comment_Author':'Unavailable',
+                    'Comment_Author': 'Unavailable',
                     'Comment_Published_date': 'Unavailable',
-                    }
-                Comment_details_list.append(Comment_details_tosql)
-                
+                }
+                comment_details_list.append(comment_details_tosql)
             else:
-                for j in range(1,3):
-                    Comment_details_tosql = {
-                    'Video_Id': result['Channel_data'][f"Video_Id_{i}"]['Video_Id'],
-                    'Comment_Id': result['Channel_data'][f"Video_Id_{i}"]['Comments'][f"Comment_Id_{j}"]['Comment_Id'],
-                    'Comment_Text': result['Channel_data'][f"Video_Id_{i}"]['Comments'][f"Comment_Id_{j}"]['Comment_Text'],
-                    'Comment_Author': result['Channel_data'][f"Video_Id_{i}"]['Comments'][f"Comment_Id_{j}"]['Comment_Author'],
-                    'Comment_Published_date': result['Channel_data'][f"Video_Id_{i}"]['Comments'][f"Comment_Id_{j}"]['Comment_PublishedAt'],
+                # Iterate through comments and extract details
+                for j in range(1, 3):  # Assuming you want to extract the first two comments
+                    comment_id = comments[f"Comment_Id_{j}"]['Comment_Id']
+                    comment_text = comments[f"Comment_Id_{j}"]['Comment_Text']
+                    comment_author = comments[f"Comment_Id_{j}"]['Comment_Author']
+                    comment_published_date = comments[f"Comment_Id_{j}"]['Comment_PublishedAt']
+
+                    comment_details_tosql = {
+                        'Video_Id': video_id,
+                        'Comment_Id': comment_id,
+                        'Comment_Text': comment_text,
+                        'Comment_Author': comment_author,
+                        'Comment_Published_date': comment_published_date,
                     }
-                    Comment_details_list.append(Comment_details_tosql)
-        Comments_df = pd.DataFrame(Comment_details_list)
+                    comment_details_list.append(comment_details_tosql)
+
+        comments_df = pd.DataFrame(comment_details_list)
+
         
         # -------------------- Data Migrate to MySQL --------------- #
 

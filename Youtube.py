@@ -9,6 +9,8 @@ from pymongo import MongoClient
 
 # [SQL libraries]
 import psycopg2
+from psycopg2 import sql
+
 
 # [File handling libraries]
 import json
@@ -322,19 +324,14 @@ with col2:
         channel_df = pd.DataFrame.from_dict(channel_details_to_sql, orient='index').T
                 
         # playlist data json to df
-        playlist_details_list = []
-        for playlist_id in result['Channel_data']['Channel_Details']['Playlist_Id']:
-            playlist_details_tosql = {
-                'Channel_Id': result['_id'],
-                'Playlist_Id': playlist_id
-            }
-            playlist_details_list.append(playlist_details_tosql)
-
-        playlist_df = pd.DataFrame(playlist_details_list)
+        playlist_tosql = {"Channel_Id": result['_id'],
+                        "Playlist_Id": result['Channel_data']['Channel_Details']['Playlist_Id']
+                        }
+        playlist_df = pd.DataFrame.from_dict(playlist_tosql, orient='index').T
 
         # video data json to df
         video_details_list = []
-        for i in range(1, len(result['Channel_data']) - 1):
+        for i in range(1, len(result['Channel_data'])):
             video_id = result['Channel_data'][f"Video_Id_{i}"]['Video_Id']
             video_name = result['Channel_data'][f"Video_Id_{i}"]['Video_Name']
             video_description = result['Channel_data'][f"Video_Id_{i}"]['Video_Description']
@@ -353,7 +350,7 @@ with col2:
 
         # Comment data json to df
         comment_details_list = []
-        for i in range(1, len(result['Channel_data']) - 1):
+        for i in range(1, len(result['Channel_data'])):
             video_id = result['Channel_data'][f"Video_Id_{i}"]['Video_Id']
             comments = result['Channel_data'][f"Video_Id_{i}"]['Comments']
 
@@ -388,60 +385,245 @@ with col2:
 
         
         # -------------------- Data Migrate to MySQL --------------- #
+        # Creating Table
+        # Database connection parameters
+        db_params = {
+            'host': 'localhost',
+            'port': '5432',
+            'user': 'postgres',
+            'password': '12345678',
+            'database': 'youtube'
+        }
 
-        # Connect to the PostgreSQL server
-        my_db=psycopg2.connect(host='localhost', 
-        port = '5432', 
-        user='postgres', 
-        password='12345678', 
-        database='youtube')
-        # Create a new database and use
-        my_cursor=my_db.cursor()
-        DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/youtube"
-        engine = create_engine(DATABASE_URL)
+        # Define the table schemas
+        table_schemas = [
+            """
+            CREATE TABLE IF NOT EXISTS channel (
+                "Channel_Name" VARCHAR(225),
+                "Channel_Id" VARCHAR(225),
+                "Video_Count" INT,
+                "Subscriber_Count" BIGINT,
+                "Channel_Views" BIGINT,
+                "Channel_Description" TEXT,
+                "Playlist_Id" VARCHAR(225)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS playlist (
+                "Channel_Id" VARCHAR(225),
+                "Playlist_Id" VARCHAR(225)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS video (
+                "Playlist_Id" VARCHAR(225),
+                "Video_Id" VARCHAR(225),
+                "Video_Name" VARCHAR(225),
+                "Video_Description" TEXT,
+                "Published_date" VARCHAR(50),
+                "View_Count" BIGINT,
+                "Like_Count" BIGINT,
+                "Dislike_Count" INT,
+                "Favorite_Count" INT,
+                "Comment_Count" INT,
+                "Duration" VARCHAR(1024),
+                "Thumbnail" VARCHAR(225),
+                "Caption_Status" VARCHAR(225)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS comments (
+                "Video_Id" VARCHAR(225),
+                "Comment_Id" VARCHAR(225),
+                "Comment_Text" TEXT,
+                "Comment_Author" VARCHAR(225),
+                "Comment_Published_date" VARCHAR(50)
+            )
+            """
+        ]
+
+        # Connect to the database
+        try:
+            my_db = psycopg2.connect(**db_params)
+            my_cursor = my_db.cursor()
+
+            # Create the tables
+            for schema in table_schemas:
+                my_cursor.execute(schema)
+                my_db.commit()
+
+
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+        # Database connection parameters
+        db_params = {
+            'host': 'localhost',
+            'port': '5432',
+            'user': 'postgres',
+            'password': '12345678',
+            'database': 'youtube'
+        }
+
+        # Assuming you have your DataFrame 'channel_df' ready
+        # Connect to the database
+        try:
+            my_db = psycopg2.connect(**db_params)
+            my_cursor = my_db.cursor()
+            
+            # Insert data from 'channel_df' into the 'channel' table
+            insert_query = """
+                INSERT INTO channel (
+                    "Channel_Name", "Channel_Id", "Video_Count", "Subscriber_Count",
+                    "Channel_Views", "Channel_Description", "Playlist_Id"
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            records = channel_df.values.tolist()  # Use .values.tolist() to convert DataFrame to list of lists
+            my_cursor.executemany(insert_query, records)
+            
+            my_db.commit()
+            
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+        # Function to handle data type conversion for specific columns
+        def convert_data_types(row):
+            # Convert specific columns to the desired data types
+            try:
+                row['Channel_Id'] = str(row['Channel_Id'])
+                row['Playlist_Id'] = str(row['Playlist_Id'])
+            except Exception as e:
+                print(f"Error converting data types: {e}")
+            return row
+
+        # Database connection parameters
+        db_params = {
+            'host': 'localhost',
+            'port': '5432',
+            'user': 'postgres',
+            'password': '12345678',
+            'database': 'youtube'
+        }
+
+        # Assuming you have your DataFrame 'playlist_df' ready
+        # Connect to the database
+        try:
+            my_db = psycopg2.connect(**db_params)
+            my_cursor = my_db.cursor()
+
+            # Define the insert query using placeholders
+            insert_query = sql.SQL("""
+                INSERT INTO playlist (
+                    "Channel_Id", "Playlist_Id"
+                ) VALUES ({}, {})
+            """)
+            
+            # Apply data type conversion to the DataFrame
+            playlist_df = playlist_df.apply(convert_data_types, axis=1)
+            
+            # Iterate through DataFrame rows and insert data
+            for index, row in playlist_df.iterrows():
+                channel_id = row['Channel_Id']
+                playlist_id = row['Playlist_Id']
+                
+                # Execute the insert query with data
+                my_cursor.execute(insert_query.format(sql.Literal(channel_id), sql.Literal(playlist_id)))
+
+            my_db.commit()
+            print("Data inserted into 'playlist' table successfully!")
+
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+        # Database connection parameters
+        db_params = {
+            'host': 'localhost',
+            'port': '5432',
+            'user': 'postgres',
+            'password': '12345678',
+            'database': 'youtube'
+        }
+
+        # Assuming you have your DataFrame 'video_df' ready
+        # Connect to the database
+        try:
+            my_db = psycopg2.connect(**db_params)
+            my_cursor = my_db.cursor()
+            
+            # Insert data from 'video_df' into the 'video' table
+            insert_query = """
+                INSERT INTO video (
+                    "Playlist_Id", "Video_Id", "Video_Name", "Video_Description",
+                    "Published_date", "View_Count", "Like_Count", "Dislike_Count",
+                    "Favorite_Count", "Comment_Count", "Duration", "Thumbnail", "Caption_Status"
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            
+            # Convert DataFrame to list of tuples for insertion
+            records = [tuple(row) for row in video_df.values]
+            
+            my_cursor.executemany(insert_query, records)
+            
+            my_db.commit()
+            
+            print("Data inserted into 'video' table successfully!")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+        # Database connection parameters
+        db_params = {
+            'host': 'localhost',
+            'port': '5432',
+            'user': 'postgres',
+            'password': '12345678',
+            'database': 'youtube'
+        }
+
+        # Assuming you have your DataFrame 'comments_df' ready
+        # Connect to the database
+        try:
+            my_db = psycopg2.connect(**db_params)
+            my_cursor = my_db.cursor()
+            
+            # Insert data from 'comments_df' into the 'comments' table
+            insert_query = """
+                INSERT INTO comments (
+                    "Video_Id", "Comment_Id", "Comment_Text", "Comment_Author", "Comment_Published_date"
+                ) VALUES (%s, %s, %s, %s, %s)
+            """
+            
+            # Convert DataFrame to list of tuples for insertion
+            records = [tuple(row) for row in Comments_df.values]
+            
+            my_cursor.executemany(insert_query, records)
+            
+            my_db.commit()
+            
+            print("Data inserted into 'comments' table successfully!")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+
         
-        
-        # Channel data to SQL
-        channel_df.to_sql('channel', engine, if_exists='append', index=False,
-                          dtype = {"Channel_Name": sqlalchemy.types.VARCHAR(length=225),
-                          "Channel_Id": sqlalchemy.types.VARCHAR(length=225),
-                          "Video_Count": sqlalchemy.types.INT,
-                          "Subscriber_Count": sqlalchemy.types.BigInteger,
-                          "Channel_Views": sqlalchemy.types.BigInteger,
-                          "Channel_Description": sqlalchemy.types.TEXT,
-                          "Playlist_Id": sqlalchemy.types.VARCHAR(length=225),})
-              
-
-        # Playlist data to SQL
-        playlist_df.to_sql('playlist', engine, if_exists='append', index=False,
-                        dtype = {"Channel_Id": sqlalchemy.types.VARCHAR(length=225),
-                                    "Playlist_Id": sqlalchemy.types.VARCHAR(length=225),})
-
-        # Video data to SQL
-        video_df.to_sql('video', engine, if_exists='append', index=False,
-                    dtype = {'Playlist_Id': sqlalchemy.types.VARCHAR(length=225),
-                            'Video_Id': sqlalchemy.types.VARCHAR(length=225),
-                            'Video_Name': sqlalchemy.types.VARCHAR(length=225),
-                            'Video_Description': sqlalchemy.types.TEXT,
-                            'Published_date': sqlalchemy.types.String(length=50),
-                            'View_Count': sqlalchemy.types.BigInteger,
-                            'Like_Count': sqlalchemy.types.BigInteger,
-                            'Dislike_Count': sqlalchemy.types.INT,
-                            'Favorite_Count': sqlalchemy.types.INT,
-                            'Comment_Count': sqlalchemy.types.INT,
-                            'Duration': sqlalchemy.types.VARCHAR(length=1024),
-                            'Thumbnail': sqlalchemy.types.VARCHAR(length=225),
-                            'Caption_Status': sqlalchemy.types.VARCHAR(length=225),})
-
-        # Commend data to SQL
-        Comments_df.to_sql('comments', engine, if_exists='append', index=False,
-                        dtype = {'Video_Id': sqlalchemy.types.VARCHAR(length=225),
-                                'Comment_Id': sqlalchemy.types.VARCHAR(length=225),
-                                'Comment_Text': sqlalchemy.types.TEXT,
-                                'Comment_Author': sqlalchemy.types.VARCHAR(length=225),
-                                'Comment_Published_date': sqlalchemy.types.String(length=50),})
-
-
 # ====================================================   /     Channel Analysis zone     /   ================================================= #
 
 st.header(':violet[Channel Data Analysis zone]')

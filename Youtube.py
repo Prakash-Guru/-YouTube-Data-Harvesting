@@ -444,24 +444,12 @@ with col2:
                 )
                 """
             ]
-        except Exception as e:
-            print(f"Error: {e}")
-
         finally:
             my_cursor.close()
             my_db.close()
         
         # Connect to the database
         
-
-            # Create the tables
-        for schema in table_schemas:
-            my_cursor.execute(schema)
-            my_db.commit()
-
-
-        my_cursor.close()
-        my_db.close()
 
         # Database connection parameters
         db_params = {

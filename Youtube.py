@@ -459,6 +459,10 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
 
+        finally:
+            my_cursor.close()
+            my_db.close()
+
         # Assuming you have your DataFrame 'channel_df' ready
         # Connect to the database
         try:
@@ -480,6 +484,11 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
         
+        finally:
+            my_cursor.close()
+            my_db.close()
+
+        
         # Function to handle data type conversion for specific columns
         def convert_data_types(row):
             # Convert specific columns to the desired data types
@@ -489,6 +498,7 @@ with col2:
             except Exception as e:
                 print(f"Error converting data types: {e}")
             return row
+        
 
         # Assuming you have your DataFrame 'playlist_df' ready
         # Connect to the database
@@ -519,6 +529,11 @@ with col2:
 
         except Exception as e:
             print(f"Error: {e}")
+        
+        finally:
+            my_cursor.close()
+            my_db.close()
+
         
         # Database connection parameters
         db_params = {
@@ -555,6 +570,10 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
 
+        finally:
+            my_cursor.close()
+            my_db.close()
+
         # Database connection parameters
         db_params = {
             'host': 'localhost',
@@ -584,8 +603,7 @@ with col2:
             
             my_db.commit()
             
-            
-
+        
         except Exception as e:
             print(f"Error: {e}")
 

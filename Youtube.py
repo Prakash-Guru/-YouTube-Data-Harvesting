@@ -443,9 +443,9 @@ with col2:
                     "Comment_Published_date" VARCHAR(50)
                 )
                 """
-            my_cursor.execute(channel_table_schema)
-            my_db.commit()
             ]
+            my_cursor.execute(table_schemas)
+            my_db.commit()
         finally:
             my_cursor.close()
             my_db.close()

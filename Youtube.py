@@ -395,12 +395,13 @@ with col2:
             'database': 'youtube'
         }
 
+        # Connect to the database
         try:
             my_db = psycopg2.connect(**db_params)
             my_cursor = my_db.cursor()
-            # Define the table schemas
-            table_schemas = [
-                """
+            
+            # Define the table schema for the "channel" table
+            channel_table_schema = """
                 CREATE TABLE IF NOT EXISTS channel (
                     "Channel_Name" VARCHAR(225),
                     "Channel_Id" VARCHAR(225),
@@ -410,14 +411,20 @@ with col2:
                     "Channel_Description" TEXT,
                     "Playlist_Id" VARCHAR(225)
                 )
-                """,
-                """
+            """
+            my_cursor.execute(channel_table_schema)
+            
+            # Define the table schema for the "playlist" table
+            playlist_table_schema = """
                 CREATE TABLE IF NOT EXISTS playlist (
                     "Channel_Id" VARCHAR(225),
                     "Playlist_Id" VARCHAR(225)
                 )
-                """,
-                """
+            """
+            my_cursor.execute(playlist_table_schema)
+
+            # Define the table schema for the "video" table
+            video_table_schema = """
                 CREATE TABLE IF NOT EXISTS video (
                     "Playlist_Id" VARCHAR(225),
                     "Video_Id" VARCHAR(225),
@@ -433,8 +440,11 @@ with col2:
                     "Thumbnail" VARCHAR(225),
                     "Caption_Status" VARCHAR(225)
                 )
-                """,
-                """
+            """
+            my_cursor.execute(video_table_schema)
+
+            # Define the table schema for the "comments" table
+            comments_table_schema = """
                 CREATE TABLE IF NOT EXISTS comments (
                     "Video_Id" VARCHAR(225),
                     "Comment_Id" VARCHAR(225),
@@ -442,14 +452,18 @@ with col2:
                     "Comment_Author" VARCHAR(225),
                     "Comment_Published_date" VARCHAR(50)
                 )
-                """
-            ]
-            my_cursor.execute(table_schemas)
+            """
+            my_cursor.execute(comments_table_schema)
+
             my_db.commit()
+            print("Tables created successfully!")
+            
+        except Exception as e:
+            print(f"Error: {e}")
+
         finally:
             my_cursor.close()
-            my_db.close()
-        
+            my_db.close()       
         # Connect to the database
         
 

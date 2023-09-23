@@ -398,7 +398,7 @@ with col2:
         try:
             my_db = psycopg2.connect(**db_params)
             my_cursor = my_db.cursor()
-        # Define the table schemas
+            # Define the table schemas
             table_schemas = [
                 """
                 CREATE TABLE IF NOT EXISTS channel (
@@ -443,6 +443,8 @@ with col2:
                     "Comment_Published_date" VARCHAR(50)
                 )
                 """
+            my_cursor.execute(channel_table_schema)
+            my_db.commit()
             ]
         finally:
             my_cursor.close()

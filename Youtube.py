@@ -395,69 +395,73 @@ with col2:
             'database': 'youtube'
         }
 
-        # Define the table schemas
-        table_schemas = [
-            """
-            CREATE TABLE IF NOT EXISTS channel (
-                "Channel_Name" VARCHAR(225),
-                "Channel_Id" VARCHAR(225),
-                "Video_Count" INT,
-                "Subscriber_Count" BIGINT,
-                "Channel_Views" BIGINT,
-                "Channel_Description" TEXT,
-                "Playlist_Id" VARCHAR(225)
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS playlist (
-                "Channel_Id" VARCHAR(225),
-                "Playlist_Id" VARCHAR(225)
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS video (
-                "Playlist_Id" VARCHAR(225),
-                "Video_Id" VARCHAR(225),
-                "Video_Name" VARCHAR(225),
-                "Video_Description" TEXT,
-                "Published_date" VARCHAR(50),
-                "View_Count" BIGINT,
-                "Like_Count" BIGINT,
-                "Dislike_Count" INT,
-                "Favorite_Count" INT,
-                "Comment_Count" INT,
-                "Duration" VARCHAR(1024),
-                "Thumbnail" VARCHAR(225),
-                "Caption_Status" VARCHAR(225)
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS comments (
-                "Video_Id" VARCHAR(225),
-                "Comment_Id" VARCHAR(225),
-                "Comment_Text" TEXT,
-                "Comment_Author" VARCHAR(225),
-                "Comment_Published_date" VARCHAR(50)
-            )
-            """
-        ]
-
-        # Connect to the database
         try:
             my_db = psycopg2.connect(**db_params)
             my_cursor = my_db.cursor()
-
-            # Create the tables
-            for schema in table_schemas:
-                my_cursor.execute(schema)
-                my_db.commit()
-
-
+        # Define the table schemas
+            table_schemas = [
+                """
+                CREATE TABLE IF NOT EXISTS channel (
+                    "Channel_Name" VARCHAR(225),
+                    "Channel_Id" VARCHAR(225),
+                    "Video_Count" INT,
+                    "Subscriber_Count" BIGINT,
+                    "Channel_Views" BIGINT,
+                    "Channel_Description" TEXT,
+                    "Playlist_Id" VARCHAR(225)
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS playlist (
+                    "Channel_Id" VARCHAR(225),
+                    "Playlist_Id" VARCHAR(225)
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS video (
+                    "Playlist_Id" VARCHAR(225),
+                    "Video_Id" VARCHAR(225),
+                    "Video_Name" VARCHAR(225),
+                    "Video_Description" TEXT,
+                    "Published_date" VARCHAR(50),
+                    "View_Count" BIGINT,
+                    "Like_Count" BIGINT,
+                    "Dislike_Count" INT,
+                    "Favorite_Count" INT,
+                    "Comment_Count" INT,
+                    "Duration" VARCHAR(1024),
+                    "Thumbnail" VARCHAR(225),
+                    "Caption_Status" VARCHAR(225)
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS comments (
+                    "Video_Id" VARCHAR(225),
+                    "Comment_Id" VARCHAR(225),
+                    "Comment_Text" TEXT,
+                    "Comment_Author" VARCHAR(225),
+                    "Comment_Published_date" VARCHAR(50)
+                )
+                """
+            ]
         except Exception as e:
             print(f"Error: {e}")
+
         finally:
             my_cursor.close()
             my_db.close()
+        
+        # Connect to the database
+        
+
+            # Create the tables
+        for schema in table_schemas:
+            my_cursor.execute(schema)
+            my_db.commit()
+
+
+        my_cursor.close()
+        my_db.close()
 
         # Database connection parameters
         db_params = {

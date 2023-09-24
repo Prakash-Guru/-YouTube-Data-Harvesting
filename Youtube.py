@@ -459,9 +459,6 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
 
-        finally:
-            # my_cursor.close()
-            my_db.close()
 
         # Assuming you have your DataFrame 'channel_df' ready
         # Connect to the database
@@ -484,9 +481,7 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
         
-        finally:
-            my_cursor.close()
-            my_db.close()
+        
 
         
         # Function to handle data type conversion for specific columns
@@ -530,9 +525,7 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
         
-        finally:
-            my_cursor.close()
-            my_db.close()
+        
 
         
         # Database connection parameters
@@ -570,9 +563,7 @@ with col2:
         except Exception as e:
             print(f"Error: {e}")
 
-        finally:
-            my_cursor.close()
-            my_db.close()
+        
 
         # Database connection parameters
         db_params = {

@@ -460,15 +460,15 @@ with col2:
             print(f"Error: {e}")
 
         finally:
-            my_cursor.close()
+            # my_cursor.close()
             my_db.close()
 
         # Assuming you have your DataFrame 'channel_df' ready
         # Connect to the database
+        channel_df['Channel_Id'] = channel_df['Channel_Id'].astype(str)
         try:
             my_db = psycopg2.connect(**db_params)
             my_cursor = my_db.cursor()
-            
             # Insert data from 'channel_df' into the 'channel' table
             insert_query = """
                 INSERT INTO channel (
